@@ -8,7 +8,7 @@ from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2TkAgg)
 from labelinput import LabelInput
 from potentiostat import Potentiostat
-from readpot import read_pot as rp
+import read_pot as rp
 
 class TestForm(tk.Frame):
 
@@ -18,31 +18,62 @@ class TestForm(tk.Frame):
         self.pots = {}
         self.parameter_pot = {}
         self.reset()
+        
+        ps = [p for k, p in pots.items()]
+         
+        self._test_names = tk.StringVar()
+        self._all_curr_range = tk.StringVar()
+        self._all_volt_range = tk.StringVar()
+
+        self._test_names.set('chronoamp')
+        self._all_curr_range.set('1uA')
+
+        try:
+            self._test_names_choice = ps[0].get_test_names()
+            self._all_curr_range_choice = ps[0].get_all_curr_range()
+            self._all_volt_range_choice = ps[0].get_all_volt_range()
+            self._all_volt_range.set(p[0].get_all_volt_range())
+        except:
+            self._test_names_choice = 'No Pots connected'
+            self._all_curr_range_choice = 'No Pots connected'
+            self._all_volt_range_choice = 'No Pots connected'
+            self._all_volt_range.set('No Pots connected')
+
 
         ### Parameters Main Frame ###
         params_input = tk.LabelFrame(
             self, text='Test Parameters')
         
+        
         ### Potentiostats List ###
         self.pots_list = tk.LabelFrame(self,
             text='Potentiostats List')
-          
-        for i, (_id, _p) in zip(
-            range(len(pots)), pots.items()):
+
+        if len(pots):
+            for i, (_id, _p) in zip(
+                range(len(pots)), pots.items()):
+                self._pot_ids = tk.StringVar()
+                self._pot_ids.set(_id)
+            
+                pot_name = ttk.Label(self.pots_list,
+                    textvariable=self._pot_ids)
+                pot_name.grid(row=i, column=0, padx=5, pady=5)
+        else:
             pot_name = ttk.Label(self.pots_list,
-                text='{}'.format(_id))
-            pot_name.grid(row=i, column=0, padx=5, pady=5)
+                text='No Potentiostats Available')
+            pot_name.grid(row=0, column=0, padx=5, pady=5)
+        
         self.pots_list.grid(row=1, column=1, padx=5)
         
-        ps = [p for k, p in pots.items()]
+        
         ### Test Choice Frame ###
         self.test_param = tk.Frame(params_input)
             
         self.inputs['test_name'] = LabelInput(
             self.test_param, 'Test Name',
-            ttk.Combobox, input_var=tk.StringVar(),
+            ttk.Combobox, input_var=self._test_names,
             input_args={
-                'values':ps[0].get_test_names(),
+                'values': self._test_names_choice,
                 'width': 10})
         self.inputs['test_name'].grid(
             row=0, column=0, columnspan=2, pady=5)
@@ -52,17 +83,17 @@ class TestForm(tk.Frame):
         self.common_params = tk.Frame(params_input)
         self.inputs['curr_range'] = LabelInput(
             self.common_params, 'Current Range',
-            ttk.Combobox, input_var=tk.StringVar(),
+            ttk.Combobox, input_var=self._all_curr_range,
             input_args={
-                'values': ps[0].get_all_curr_range(),
+                'values': self._all_curr_range_choice,
                 'width': 7})
         self.inputs['curr_range'].grid(
             row=0, column=0, columnspan=2, pady=5)
         self.inputs['output_volt'] = LabelInput(
             self.common_params, 'Output Voltage',
-            ttk.Combobox, input_var=tk.StringVar(),
+            ttk.Combobox, input_var=self._all_volt_range,
             input_args={
-                'values': ps[0].get_all_volt_range(),
+                'values': self._all_volt_range_choice,
                 'width': 7})
         self.inputs['output_volt'].grid(
             row=1, column=0, columnspan=2, pady=5)
@@ -90,18 +121,23 @@ class TestForm(tk.Frame):
             row=2, column=0, padx=5, pady=5)
        
         ### Duration and Sample Rate Frame ###
+        self._run_duration = tk.IntVar()
+        self._run_duration.set('3000')
         self.d_s_rate_frame = tk.LabelFrame(params_input,
             text='Duration and Sample Rate')
         self.inputs['run_duration'] = LabelInput(
             self.d_s_rate_frame, 'Run Duration (ms)',
             input_args={'width': 7},
-            input_var=tk.IntVar()) 
+            input_var=self._run_duration) 
         self.inputs['run_duration'].grid(
             row=0, column=0, padx=5, pady=5)
+
+        self._d_s_rate = tk.IntVar()
+        self._d_s_rate.set('1')
         self.inputs['sample_rate'] = LabelInput(
             self.d_s_rate_frame, 'Sample Rate (/s)',
             input_args={'width': 7},
-            input_var=tk.IntVar())
+            input_var=self._d_s_rate)
         self.inputs['sample_rate'].grid(
             row=1, column=0, columnspan=2, padx=5, pady=5)
         self.d_s_rate_frame.grid(
@@ -111,16 +147,22 @@ class TestForm(tk.Frame):
         self.steps_frame = tk.LabelFrame(params_input,
             text='Steps')
             ### Step 1 Frame ###
+        self._step1_volt = tk.DoubleVar()
+        self._step1_volt.set('0.05')
+
+        self._step1_duration = tk.IntVar()
+        self._step1_duration.set('1000')
+
         self.step1_frame = tk.LabelFrame(self.steps_frame,
             text='Step 1')
         self.inputs['step1_volt'] = LabelInput(self.step1_frame,
            'Volt (V)', input_args={'width': 7},
-            input_var=tk.DoubleVar())
+            input_var=self._step1_volt)
         self.inputs['step1_volt'].grid(
             row=0, column=0, padx=5, pady=5)
         self.inputs['step1_duration'] = LabelInput(self.step1_frame,
             'Duration (ms)', input_args={'width': 7},
-            input_var=tk.IntVar())
+            input_var=self._step1_duration)
         self.inputs['step1_duration'].grid(
             row=1, column=0, padx=5, pady=5)
         self.step1_frame.grid(
@@ -207,6 +249,24 @@ class TestForm(tk.Frame):
             data[key] = widget.get()
         return data
 
+    def set(self, value, *args, **kwargs):
+        if type(self.variable) == tk.BooleanVar:
+            self.variable.set(bool(value))
+        elif self.variable:
+            self.variable.set(value, *args, **kwargs)
+        elif type(self.input) in (ttk.Checkbutton,
+        ttk.Radiobutton):
+            if value:
+                self.input.select()
+            else:
+                self.input.deselect()
+        elif type(self.input) == tk.Text:
+            self.input.deselect('1.0', tk.END)
+            self.input.insert('1.0', value)
+        else:
+            self.input.delete(0, tk.END)
+            self.input.insert(0, value)
+
     def reset(self):
         for widget in self.inputs.values():
             widget.set('')
@@ -244,12 +304,12 @@ class MainApplication(tk.Tk):
             font=('TkDefault', 16)).grid(row=0)
         self.testform = {}
         
-        if len(pots) == 0:
-            ttk.Label(self, text='No Potentiostats are available'
-            ).grid(row=1)
-            refresh_form = ttk.Button(self, text='Refresh',
-                command=self.update)
-            refresh_form.grid(row=2)
+        #if len(pots) == 0:
+        #ttk.Label(self, text='No Potentiostats are available'
+          #  ).grid(row=1)
+        #refresh_form = ttk.Button(self, text='Refresh',
+        #        command=self.update)
+        #    refresh_form.grid(row=2)
         #for i, (_id, p) in zip(range(len(pots)), pots.items()):
         self.testform = TestForm(self)
         self.testform.grid(

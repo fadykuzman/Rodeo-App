@@ -26,4 +26,4 @@ for _id, p in pots.items():
                     electrode='2.2kOhm',
                     sample_rate=4,
                     run_duration=2000,
-                    filename='./cal.csv')
+                    filename='./calibration.csv')
