@@ -1,0 +1,21 @@
+==============================================================
+List of inputs and Outputs and the Widgets used for data entry
+==============================================================
+
+Test Name      |   Listbox
+
+Current Range  |   Listbox
+
+quietTime      |   Spinbox
+
+quietValue     |   Spinbox
+
+duration       |   Entry
+ 
+duration unit  |   Listbox
+
+amplitude      |
+
+potentiostats  |   Checkbutton
+
+

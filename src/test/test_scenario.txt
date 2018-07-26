@@ -1,0 +1,29 @@
+THE TEST SCENARIOS TO CALIBRATE THE POTENTIOSTATS.
+
+FOR EACH POTENTIOSTAT, 3 CYCLES OF THE FOLLOWING (CHEMICAL)_TESTS METHODS ARE RUN AND THE DATA SAVED:
+
+first with
+
+    - CYCLIC VOLTAMMETRY:
+        PARAMETERS: 
+                    quietValue =  0
+                    quietTime =  0
+                    minVolt =  -0.2
+                    maxVolt =  1
+                    scanRate =  0.1
+                    numCycles = 10
+                    shift =  0.0
+                    curr_range = 100uA
+                    test_name = 'cyclic'
+
+    - CHRONOAMPEROMETRY:
+        PARAMETERS:
+                    duration_min = 10    
+                    quietValue = 0.05
+                    quietTime = 0 
+                    duration = 60 * 1000 * duration_min
+                    step = [[duration, quietValue],[duration, quietValue]]
+                    curr_range = 100uA
+                    test_name = 'chronoamp'
+
+
