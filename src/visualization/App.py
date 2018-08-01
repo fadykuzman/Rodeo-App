@@ -18,33 +18,34 @@ class TestForm(tk.Frame):
         self.pots = {}
         self.parameter_pot = {}
         self.reset()
-        
+
         ps = [p for k, p in pots.items()]
-         
+
         self._test_names = tk.StringVar()
         self._all_curr_range = tk.StringVar()
         self._all_volt_range = tk.StringVar()
 
         self._test_names.set('chronoamp')
         self._all_curr_range.set('1uA')
+        self._all_volt_range.set('1V')
 
-        try:
-            self._test_names_choice = ps[0].get_test_names()
-            self._all_curr_range_choice = ps[0].get_all_curr_range()
-            self._all_volt_range_choice = ps[0].get_all_volt_range()
-            self._all_volt_range.set(p[0].get_all_volt_range())
-        except:
-            self._test_names_choice = 'No Pots connected'
-            self._all_curr_range_choice = 'No Pots connected'
-            self._all_volt_range_choice = 'No Pots connected'
-            self._all_volt_range.set('No Pots connected')
 
+        self._test_names_choice = [
+            'cyclic', 'sinusoid', 'constant', 'linearSweep',
+            'chronoamp', 'multiStep'
+        ]
+        self._all_curr_range_choice = [
+            '1uA', '10uA', '100uA', '1000uA'
+        ]
+        self._all_volt_range_choice = [
+            '1V', '2V', '5V', '10V'
+        ]
 
         ### Parameters Main Frame ###
         params_input = tk.LabelFrame(
             self, text='Test Parameters')
-        
-        
+
+
         ### Potentiostats List ###
         self.pots_list = tk.LabelFrame(self,
             text='Potentiostats List')
@@ -54,7 +55,7 @@ class TestForm(tk.Frame):
                 range(len(pots)), pots.items()):
                 self._pot_ids = tk.StringVar()
                 self._pot_ids.set(_id)
-            
+
                 pot_name = ttk.Label(self.pots_list,
                     textvariable=self._pot_ids)
                 pot_name.grid(row=i, column=0, padx=5, pady=5)
@@ -62,13 +63,13 @@ class TestForm(tk.Frame):
             pot_name = ttk.Label(self.pots_list,
                 text='No Potentiostats Available')
             pot_name.grid(row=0, column=0, padx=5, pady=5)
-        
+
         self.pots_list.grid(row=1, column=1, padx=5)
-        
-        
+
+
         ### Test Choice Frame ###
         self.test_param = tk.Frame(params_input)
-            
+
         self.inputs['test_name'] = LabelInput(
             self.test_param, 'Test Name',
             ttk.Combobox, input_var=self._test_names,
@@ -98,7 +99,7 @@ class TestForm(tk.Frame):
         self.inputs['output_volt'].grid(
             row=1, column=0, columnspan=2, pady=5)
         self.common_params.grid(
-            row=1, column=0, padx=5, pady=5) 
+            row=1, column=0, padx=5, pady=5)
 
         ### Specific Parameters Frame ###
         self.specific_params = tk.LabelFrame(params_input,
@@ -119,7 +120,7 @@ class TestForm(tk.Frame):
             row=1, column=0, padx=5, pady=5)
         self.specific_params.grid(
             row=2, column=0, padx=5, pady=5)
-       
+
         ### Duration and Sample Rate Frame ###
         self._run_duration = tk.IntVar()
         self._run_duration.set('3000')
@@ -128,7 +129,7 @@ class TestForm(tk.Frame):
         self.inputs['run_duration'] = LabelInput(
             self.d_s_rate_frame, 'Run Duration (ms)',
             input_args={'width': 7},
-            input_var=self._run_duration) 
+            input_var=self._run_duration)
         self.inputs['run_duration'].grid(
             row=0, column=0, padx=5, pady=5)
 
@@ -198,32 +199,32 @@ class TestForm(tk.Frame):
 
         ### Start Stop Button Frame ###
         self.strt_stp = tk.Frame(self)
-        
+
         self.strt_btn = ttk.Button(
             self.strt_stp, text='Start Run',
             command=self.start_run)
         self.strt_btn.grid(row=0, column=0, padx=5, pady=5)
-        
+
         self.stop_btn = ttk.Button(
-            self.strt_stp, text='Stop Run', 
+            self.strt_stp, text='Stop Run',
             command=self.stop_run)
         self.stop_btn.grid(row=0, column=1, padx=5, pady=5)
-       
+
         self.strt_stp.grid(row=2, column=0)
 
         params_input.grid(
-            row=1, column=0, pady=5, 
+            row=1, column=0, pady=5,
             sticky=(tk.W, tk.E, tk.N, tk.S))
 
         ### Graphing Frame ###
-        
+
 
     def start_run(self):
         for k, p in pots.items():
             thread = Thread(target=rp.chronoamperometry,
                 args=(p,),
                 kwargs={
-                    'test_name': self.get()['test_name'], 
+                    'test_name': self.get()['test_name'],
                     'curr_range': self.get()['curr_range'],
                     'out_volt_range': self.get()['output_volt'],
                     'sample_rate': self.get()['sample_rate'],
@@ -237,11 +238,11 @@ class TestForm(tk.Frame):
                     'electrode': self.get()['electrode']
                 })
             thread.start()
- 
+
     def stop_run(self):
         for k, p in pots.items():
             thread = Thread(target=p.stop_test)
-            thread.start() 
+            thread.start()
 
     def get(self):
         data = {}
@@ -272,7 +273,7 @@ class TestForm(tk.Frame):
             widget.set('')
 
 class YieldChartView(tk.Frame):
-    
+
     def __init__(self, parent, x_axis, y_axis, title):
         super().__init__(parent)
         self.figure = Figure(figsize=(6, 4), dpi=100)
@@ -295,7 +296,7 @@ class YieldChartView(tk.Frame):
 
 
 class MainApplication(tk.Tk):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title('Rodeo Potentiostat App')
@@ -303,7 +304,7 @@ class MainApplication(tk.Tk):
         ttk.Label(self, text='SKAN Rodeo Potentiostat Application',
             font=('TkDefault', 16)).grid(row=0)
         self.testform = {}
-        
+
         #if len(pots) == 0:
         #ttk.Label(self, text='No Potentiostats are available'
           #  ).grid(row=1)
@@ -314,10 +315,10 @@ class MainApplication(tk.Tk):
         self.testform = TestForm(self)
         self.testform.grid(
             row=1, column=0, padx=10, pady=10)
-        
+
         #popup = tk.Toplevel()
         #chart = YieldChartView(popup,
-            
+
 
 pots = rp.read_pots()
 

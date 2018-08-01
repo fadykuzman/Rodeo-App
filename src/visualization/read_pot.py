@@ -7,6 +7,9 @@ from potentiostat import Potentiostat
 
 
 def read_pots():
+    """
+    searches the operating system for connected serial ports
+    """
     devlist = os.listdir('/dev')
 
     coms = [c for c in devlist if c.startswith('ttyACM')]
@@ -22,7 +25,10 @@ def read_pots():
 #pots = read_pots()
 
 def chronoamperometry(p, print_values=True, **params):
-
+    """
+    runs Chronoamperometry Test with the given parameters.
+    Otherwise, it uses default parameters.
+    """
     test_name = params.get('test_name', 'chronoamp')
     curr_range = params.get('curr_range','100uA')
     sample_rate = params.get('sample_rate', 1)
